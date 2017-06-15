@@ -20,44 +20,41 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 class KWICWindow extends JFrame
 {
-    private JPanel programPanel, itemsPanel;
-    private JTabbedPane tabbedPane;
-    private JList searchList, resultsList;
-    private JTextArea inputBox, outputBox;
-    private JButton runButton, clearInputButton, clearOutputButton;
-    private JButton switchButton;
-    private JLabel imgLabel;
-    private boolean optionBool;
+    private final JPanel programPanel, filterPanel;
+    private final JTabbedPane tabbedPane;
+    private final JTextArea inputBox, outputBox;
+    private final JButton runButton, clearInputButton, clearOutputButton;
+    private final JButton switchButton;
+    private final JLabel imgLabel;
+    private final StringFilter shift, sorter;
     
     private BufferedImage option1, option2;
+
+    private StringFilter firstFilter;
     
-    private StringFilter shift, sorter, firstFilter;
+    private boolean optionBool;
     
     public KWICWindow()
     {   
         loadImages();
         
-        setSize(400, 350);
-        
         programPanel = new JPanel();
         programPanel.setLayout(new FlowLayout());
-        itemsPanel = new JPanel();
-        itemsPanel.setLayout(new BoxLayout(itemsPanel, BoxLayout.Y_AXIS));
+        filterPanel = new JPanel();
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
         
         tabbedPane = new JTabbedPane();
         
         tabbedPane.addTab("Program", programPanel);
-        tabbedPane.addTab("Filters", itemsPanel);
+        tabbedPane.addTab("Filters", filterPanel);
         
         add(tabbedPane);
         
@@ -92,20 +89,14 @@ class KWICWindow extends JFrame
         
         imgLabel = new JLabel(new ImageIcon(option1));
         imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        itemsPanel.add(imgLabel);
+        filterPanel.add(imgLabel);
         
         switchButton = new JButton("Switch Filter Order");
         switchButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         switchButton.addActionListener(new SwitchButtonActionListener());
-        itemsPanel.add(switchButton);
+        filterPanel.add(switchButton);
         
         optionBool = true;
-        
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
         
         shift = new CircularShift();
         sorter = new SortFilter();
@@ -119,12 +110,12 @@ class KWICWindow extends JFrame
         {                
           option1 = ImageIO.read(new File("src/images/Option1.png"));
           option2 = ImageIO.read(new File("src/images/Option2.png"));
-       } catch (IOException ex)
-       {
+        } catch (IOException ex)
+        {
             String workingDir = System.getProperty("user.dir");
             System.out.println("Current working directory : " + workingDir);
             ex.printStackTrace();
-       }
+        }
     }
     
     private class ClearInputButtonActionListener implements ActionListener
@@ -133,8 +124,7 @@ class KWICWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             inputBox.setText("");
-        }
-        
+        }  
     }
     
     private class ClearOutputButtonActionListener implements ActionListener
@@ -143,8 +133,7 @@ class KWICWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             outputBox.setText("");
-        }
-        
+        }   
     }
     
     private class RunButtonActionListener implements ActionListener
@@ -153,8 +142,7 @@ class KWICWindow extends JFrame
         public void actionPerformed(ActionEvent e)
         {
             outputBox.setText(firstFilter.processString(inputBox.getText()));
-        }
-        
+        }  
     }
     
     private class SwitchButtonActionListener implements ActionListener
@@ -178,5 +166,16 @@ class KWICWindow extends JFrame
                 firstFilter = sorter;
             }
         }
+    }
+    
+    public static void main(String[] args)
+    {
+        KWICWindow f = new KWICWindow();
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        f.setSize(400, 350);
+        f.setLocation(dim.width/2-f.getSize().width/2, dim.height/2-f.getSize().height/2);
+        f.setResizable(false);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setVisible(true);
     }
 }
