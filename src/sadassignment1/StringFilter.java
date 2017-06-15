@@ -11,8 +11,8 @@ package sadassignment1;
  */
 public abstract class StringFilter
 {
-    String result;
-    StringFilter nextFilter;
+    protected String result;
+    protected StringFilter nextFilter;
     
     public String processString(String s)
     {

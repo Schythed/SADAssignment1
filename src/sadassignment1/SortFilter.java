@@ -32,7 +32,7 @@ public class SortFilter extends StringFilter
         return super.processString(result);
     }
     
-    public int compare(String s1, String s2)
+    private int compare(String s1, String s2)
     {
         int l1 = s1.length();
         int l2 = s2.length();
