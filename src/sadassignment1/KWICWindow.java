@@ -27,11 +27,16 @@ class KWICWindow extends JFrame
     Pipe inputToShift, shiftToSorter, sorterToOutput;
     Filter input, shift, sort, output;
     
+    /**
+    * Default constructor.
+    * Makes the KWICWindow.
+    * Does not assign any general JFrame properties.
+    */
     public KWICWindow()
     {   
+        //Setup the program's layout
         JPanel programPanel = new JPanel();
         programPanel.setLayout(new FlowLayout());
-        
         
         add(programPanel);
         
@@ -48,7 +53,7 @@ class KWICWindow extends JFrame
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout());
         
-        
+        //Assign Action Listeners to Buttons
         runButton = new JButton("Run");
         runButton.addActionListener(new RunButtonActionListener());
         clearInputButton = new JButton("Clear Input");
@@ -56,6 +61,7 @@ class KWICWindow extends JFrame
         clearOutputButton = new JButton("Clear Output");
         clearOutputButton.addActionListener(new ClearOutputButtonActionListener());
         
+        //Add objects to the panel
         bottomPanel.add(inputScroll);
         bottomPanel.add(outputScroll);
         programPanel.add(runButton);
@@ -88,18 +94,22 @@ class KWICWindow extends JFrame
         @Override
         public void actionPerformed(ActionEvent e)
         {
+            //Clear the output first
             outputBox.setText("");
             try
             {
+                //Creates the pipes
                 inputToShift = new Pipe();
                 shiftToSorter = new Pipe();
                 sorterToOutput = new Pipe();
                 
+                //Creates filters and connects them using pipes
                 input = new Input(inputBox.getText(), inputToShift);
                 shift = new CircularShift(inputToShift, shiftToSorter);
                 sort = new SortFilter(shiftToSorter, sorterToOutput);
                 output = new Output(sorterToOutput, outputBox);
                 
+                //Start all of the filters
                 input.start();
                 shift.start();
                 sort.start();
@@ -118,7 +128,7 @@ class KWICWindow extends JFrame
         super.processWindowEvent(e);
         if(e.getID() == WindowEvent.WINDOW_CLOSING)
         {
-
+            //Stop all filters
             if(input != null)
                 input.stop();
             if(shift != null)
@@ -128,6 +138,7 @@ class KWICWindow extends JFrame
             if(output != null)
                 output.stop();
             
+            //Close all pipes
             try
             {
                 if(inputToShift != null)
@@ -139,11 +150,17 @@ class KWICWindow extends JFrame
             }
             catch(IOException ex)
             {
-
+                ex.printStackTrace();
             }
         }
     }
     
+    /**
+    * Starts the program.
+    * Creates a KWICWindow and gives it its properties.
+    * 
+    * @param args the arguments to be passed to the program (ignores all arguments)
+    */
     public static void main(String[] args)
     {
         KWICWindow f = new KWICWindow();

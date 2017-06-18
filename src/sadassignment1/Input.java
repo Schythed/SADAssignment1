@@ -14,14 +14,25 @@ import java.io.IOException;
 public class Input extends Filter
 {
 
-    private String inputString;
+    private final String inputString;   
     
+    /**
+    * Default constructor.
+    * Passes the parameters directly to the super class's constructor.
+    * 
+    * @param in Input String to be processed
+    * @param output Output pipe
+    */
     public Input(String in, Pipe output)
     {
         super(null, output);
         inputString = in;
     }
     
+    /**
+    * Data Pump.
+    * Processes the inputString and writes to the output Pipe.
+    */
     @Override
     protected void transform()
     {
@@ -75,6 +86,5 @@ public class Input extends Filter
             System.err.println("KWIC Error: Could not read the input file.");
             System.exit(1);
         }
-    }
-    
+    } 
 }

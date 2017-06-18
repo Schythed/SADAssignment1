@@ -15,13 +15,25 @@ import javax.swing.JTextArea;
 public class Output extends Filter
 {
     
-    JTextArea outputBox;
+    private final JTextArea outputBox;
     
+    /**
+    * Default constructor.
+    * Passes the parameters directly to the super class's constructor.
+    * 
+    * @param input Input Pipe
+    * @param outputArea Visible Output Area
+    */
     public Output(Pipe input, JTextArea outputArea)
     {
         super(input, null);
         outputBox = outputArea;
     }
+
+    /**
+    * Data Sink.
+    * Reads data and writes it to the outputBox.
+    */
 
     @Override
     protected void transform()

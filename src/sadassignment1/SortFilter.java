@@ -15,35 +15,33 @@ import java.util.ArrayList;
 public class SortFilter extends Filter
 {   
 
+    /**
+    * Default constructor.
+    * Passes the parameters directly to the super class's constructor.
+    * 
+    * @param input Input pipe
+    * @param output Output pipe
+    */
     public SortFilter(Pipe input, Pipe output)
     {
         super(input, output);
     }
-    
+
+    /**
+    * Sort Filter Processing.
+    * Each line read is sorted using a heap sort.
+    * The sort uses a special kind of comparison.
+    * 
+    * @see #compare(java.lang.String, java.lang.String)
+    */
     @Override
     public void transform()
     {
-        /*
-        String result = new String();
-        String[] strParts = result.split("\\r?\\n|\\r");
-        int n = strParts.length;
-        for (int i = 0; i < n; i++)
-            for (int j = 1; j < (n - i); j++)
-                if(compare(strParts[j - 1], strParts[j]) > 0)
-                {
-                    String temp = strParts[j - 1];
-                    strParts[j - 1] = strParts[j];
-                    strParts[j] = temp;
-                }
-        
-        for(String st : strParts)
-            result += st + '\n';
-        */
         try
         {
             int c = input.read();
             
-            ArrayList<String> lines = new ArrayList();
+            ArrayList<String> lines = new ArrayList(); //Arraylist for each line to sort
             String line = new String();
             
             while(c != -1)
@@ -57,8 +55,9 @@ public class SortFilter extends Filter
                 c = input.read();
             }
             
-            sort(lines);
+            sort(lines);  //Sorts all of the lines
             
+            //Send the sorted lines down the pipe
             for(String l : lines)
                 for(char ch : l.toCharArray())
                     output.write(ch);
@@ -73,6 +72,14 @@ public class SortFilter extends Filter
         }
     }
     
+    /**
+    * Heapsort for ArrayLists.
+    * Sorts the Arraylist using a heapsort.
+    * Utilizes the siftDown method.
+    * 
+    * @param lines the lines of strings to be sorted
+    * @see #siftDown(java.util.ArrayList, int, int)
+    */
     private void sort(ArrayList lines)
     {
         int size = lines.size();
@@ -89,6 +96,16 @@ public class SortFilter extends Filter
         }
     }
     
+    /**
+    * Sifting method for Arraylists.
+    * Sorts the Arraylist using a heapsort.
+    * Utilizes the compare method to compare strings.
+    * 
+    * @param lines the lines of strings to be sorted
+    * @param root the start of the sift
+    * @param bottom the bottom of the sift
+    * @see #compare(java.lang.String, java.lang.String) 
+    */
     private void siftDown(ArrayList lines, int root, int bottom)
     {    
         int max_child = root * 2 + 1;
@@ -111,6 +128,17 @@ public class SortFilter extends Filter
         }    
     }
     
+    /**
+    * Custom compare for Strings.
+    * Compares the strings in the following manner where “a<A<b<B< … <y<Y<z<Z”
+    * 
+    * @param lines the lines of strings to be sorted
+    * @param root the start of the sift
+    * @param bottom the bottom of the sift
+    * @return -1 if s1 < s2
+    * @return 1 if s1 > s2
+    * @return 0 if s1 == s2
+    */
     private int compare(String s1, String s2)
     {
         int l1 = s1.length();
