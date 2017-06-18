@@ -5,30 +5,64 @@
  */
 package sadassignment1;
 
+import java.io.IOException;
+
 /**
  *
  * @author josh
  */
-public class CircularShift extends StringFilter
+public class CircularShift extends Filter
 {   
-    @Override
-    public String processString(String s)
+
+    public CircularShift(Pipe input, Pipe output)
     {
-        result = new String();
-        String[] strParts = s.split("\\r?\\n|\\r");
-        for(String st : strParts)
+        super(input, output);
+    }
+    
+    @Override
+    public void transform()
+    { 
+        try
         {
-            String[] strParts2 = st.split("\\s+");
-            for(int i = 0; i < strParts2.length; i++)
+            int c = input.read();
+            
+            String line = new String();
+            
+            while(c != -1)
             {
-                for(int j = i; j < strParts2.length; j++)
-                    result += strParts2[j] + ' ';
-                for(int j = 0; j < i; j++)
-                    result += strParts2[j] + ' ';
-                result += '\n';
+                if(((char) c) == '\n')
+                {
+                    String result = new String();
+                    String[] words = line.split("\\s+");
+                    for(int i = 0; i < words.length; i++)
+                    {
+                        for(int j = i; j < words.length; j++)
+                        {
+                            for(int k = 0; k < words[j].length(); k++)
+                                output.write(words[j].charAt(k));
+                            output.write(' ');
+                        }
+                        for(int j = 0; j < i; j++)
+                        {
+                            for(int k = 0; k < words[j].length(); k++)
+                                output.write(words[j].charAt(k));
+                            output.write(' ');
+                        }
+                        output.write('\n');
+                    }
+                    line = new String();
+                }
+                else
+                    line += (char)(c);
+                c = input.read();
             }
+            output.closeWriter();
+        } 
+        catch (IOException ex)
+        {
+            ex.printStackTrace();
+            System.err.println("KWIC Error: Could not make circular shifts.");
+            System.exit(1);
         }
-        
-        return super.processString(result);
     }
 }

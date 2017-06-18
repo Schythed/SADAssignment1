@@ -5,58 +5,35 @@
  */
 package sadassignment1;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
 class KWICWindow extends JFrame
 {
-    private final JPanel programPanel, filterPanel;
-    private final JTabbedPane tabbedPane;
     private final JTextArea inputBox, outputBox;
     private final JButton runButton, clearInputButton, clearOutputButton;
-    private final JButton switchButton;
-    private final JLabel imgLabel;
-    private final StringFilter shift, sorter;
     
-    private BufferedImage option1, option2;
-
-    private StringFilter firstFilter;
-    
-    private boolean optionBool;
+    Pipe inputToShift, shiftToSorter, sorterToOutput;
+    Filter input, shift, sort, output;
     
     public KWICWindow()
     {   
-        loadImages();
-        
-        programPanel = new JPanel();
+        JPanel programPanel = new JPanel();
         programPanel.setLayout(new FlowLayout());
-        filterPanel = new JPanel();
-        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
         
-        tabbedPane = new JTabbedPane();
         
-        tabbedPane.addTab("Program", programPanel);
-        tabbedPane.addTab("Filters", filterPanel);
-        
-        add(tabbedPane);
+        add(programPanel);
         
         inputBox = new JTextArea(10, 16);
         JScrollPane inputScroll = new JScrollPane(inputBox);
@@ -86,36 +63,6 @@ class KWICWindow extends JFrame
         programPanel.add(clearOutputButton);
         
         programPanel.add(bottomPanel);
-        
-        imgLabel = new JLabel(new ImageIcon(option1));
-        imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        filterPanel.add(imgLabel);
-        
-        switchButton = new JButton("Switch Filter Order");
-        switchButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        switchButton.addActionListener(new SwitchButtonActionListener());
-        filterPanel.add(switchButton);
-        
-        optionBool = true;
-        
-        shift = new CircularShift();
-        sorter = new SortFilter();
-        shift.setNextFilter(sorter);
-        firstFilter = shift;
-    }
-
-    private void loadImages()
-    {
-        try
-        {                
-          option1 = ImageIO.read(new File("src/images/Option1.png"));
-          option2 = ImageIO.read(new File("src/images/Option2.png"));
-        } catch (IOException ex)
-        {
-            String workingDir = System.getProperty("user.dir");
-            System.out.println("Current working directory : " + workingDir);
-            ex.printStackTrace();
-        }
     }
     
     private class ClearInputButtonActionListener implements ActionListener
@@ -141,29 +88,58 @@ class KWICWindow extends JFrame
         @Override
         public void actionPerformed(ActionEvent e)
         {
-            outputBox.setText(firstFilter.processString(inputBox.getText()));
+            outputBox.setText("");
+            try
+            {
+                inputToShift = new Pipe();
+                shiftToSorter = new Pipe();
+                sorterToOutput = new Pipe();
+                
+                input = new Input(inputBox.getText(), inputToShift);
+                shift = new CircularShift(inputToShift, shiftToSorter);
+                sort = new SortFilter(shiftToSorter, sorterToOutput);
+                output = new Output(sorterToOutput, outputBox);
+                
+                input.start();
+                shift.start();
+                sort.start();
+                output.start();
+            }
+            catch(IOException ex)
+            {
+                ex.printStackTrace();
+            }
         }  
     }
     
-    private class SwitchButtonActionListener implements ActionListener
+    @Override
+    public void processWindowEvent(WindowEvent e)
     {
-        @Override
-        public void actionPerformed(ActionEvent e)
+        super.processWindowEvent(e);
+        if(e.getID() == WindowEvent.WINDOW_CLOSING)
         {
-            optionBool = !optionBool;
-            if(optionBool)
+
+            if(input != null)
+                input.stop();
+            if(shift != null)
+                shift.stop();
+            if(sort != null)
+                sort.stop();
+            if(output != null)
+                output.stop();
+            
+            try
             {
-                imgLabel.setIcon(new ImageIcon(option1));
-                shift.setNextFilter(sorter);
-                sorter.setNextFilter(null);
-                firstFilter = shift;
+                if(inputToShift != null)
+                    inputToShift.close();
+                if(shiftToSorter != null)
+                    shiftToSorter.close();
+                if(sorterToOutput != null)
+                    sorterToOutput.close();
             }
-            else
+            catch(IOException ex)
             {
-                imgLabel.setIcon(new ImageIcon(option2));
-                sorter.setNextFilter(shift);
-                shift.setNextFilter(null);
-                firstFilter = sorter;
+
             }
         }
     }
@@ -176,6 +152,7 @@ class KWICWindow extends JFrame
         f.setLocation(dim.width/2-f.getSize().width/2, dim.height/2-f.getSize().height/2);
         f.setResizable(false);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setTitle("KWIC Sorter");
         f.setVisible(true);
     }
 }
