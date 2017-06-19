@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package sadassignment1;
 
 import java.awt.Dimension;
@@ -19,6 +14,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
+/**
+ *
+ * @author josh
+ */
 class KWICWindow extends JFrame
 {
     private final JTextArea inputBox, outputBox;
